@@ -296,7 +296,7 @@
                             <th>Tahun Terbit</th>
                             <th>Stok</th>
                             <th>Kategori</th>
-                            <th>Aksi</th>
+                            <th></th>
                         </tr>
                     </thead>
 
