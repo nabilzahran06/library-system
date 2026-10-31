@@ -6,7 +6,7 @@
 @section('content')
 <style>
     .books-container {
-        max-width: 1100px;
+        max-width: 1200px;
         margin: 40px auto;
         padding: 0 20px;
         font-family: Arial, sans-serif;
@@ -91,16 +91,17 @@
 
     .books-table {
         width: 100%;
-        min-width: 850px;
+        min-width: 1050px;
         border-collapse: collapse;
     }
 
     .books-table th,
     .books-table td {
-        padding: 16px 20px;
+        padding: 16px 18px;
         text-align: left;
         border-bottom: 1px solid #eee;
         font-size: 14px;
+        vertical-align: middle;
     }
 
     .books-table th {
@@ -109,6 +110,7 @@
         font-size: 12px;
         text-transform: uppercase;
         letter-spacing: .4px;
+        white-space: nowrap;
     }
 
     .books-table tbody tr {
@@ -123,14 +125,9 @@
         border-bottom: none;
     }
 
-    .book-number {
-        color: #888;
-        width: 55px;
-    }
-
+    .book-number,
     .book-id {
         color: #888;
-        font-size: 13px;
     }
 
     .book-title {
@@ -161,6 +158,44 @@
         font-weight: 600;
     }
 
+    .book-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        display: inline-block;
+        padding: 7px 10px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .action-detail {
+        background: #e8f1ff;
+        color: #2563eb;
+    }
+
+    .action-edit {
+        background: #fff4df;
+        color: #b7791f;
+    }
+
+    .action-delete {
+        background: #feecec;
+        color: #dc2626;
+    }
+
+    .action-btn:hover {
+        opacity: .8;
+    }
+
     .books-empty {
         padding: 45px 20px;
         text-align: center;
@@ -172,6 +207,26 @@
         border-top: 1px solid #eee;
         color: #888;
         font-size: 12px;
+    }
+
+    .add-book-btn {
+        display: inline-block;
+        padding: 11px 16px;
+        background: #2563eb;
+        color: #fff;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .add-book-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .delete-form {
+        display: inline;
+        margin: 0;
     }
 
     @media (max-width: 600px) {
@@ -198,6 +253,10 @@
             <h2>Daftar Buku</h2>
             <p>Kelola dan lihat koleksi buku perpustakaan.</p>
         </div>
+
+        <a href="{{ route('books.create') }}" class="add-book-btn">
+            + Tambah Buku
+        </a>
     </div>
 
     {{-- Ringkasan --}}
@@ -237,6 +296,7 @@
                             <th>Tahun Terbit</th>
                             <th>Stok</th>
                             <th>Kategori</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
 
@@ -273,6 +333,33 @@
                                     <span class="book-category">
                                         {{ $book->category->name ?? '-' }}
                                     </span>
+                                </td>
+
+                                <td>
+                                    <div class="book-actions">
+                                        <a href="{{ route('books.show', $book->id) }}"
+                                           class="action-btn action-detail">
+                                            Detail
+                                        </a>
+
+                                        <a href="{{ route('books.edit', $book->id) }}"
+                                           class="action-btn action-edit">
+                                            Edit
+                                        </a>
+
+                                        <form action="{{ route('books.destroy', $book->id) }}"
+                                              method="POST"
+                                              class="delete-form"
+                                              onsubmit="return confirm('Yakin ingin menghapus buku ini?')">
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit"
+                                                    class="action-btn action-delete">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
