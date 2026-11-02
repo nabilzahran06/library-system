@@ -54,7 +54,7 @@ class BookController extends Controller
             ],
             'published_year' => 'required|integer|min:1000|max:' . date('Y'),
             'stock' => 'required|integer|min:0|max:1000',
-            'category_id' => 'nullable|exists:categories,id',
+            'category_id' => 'required|exists:categories,id',
         ], [
             'title.required' => 'Judul buku wajib diisi.',
             'title.min' => 'Judul buku minimal 3 karakter.',
@@ -118,7 +118,7 @@ class BookController extends Controller
             ],
             'published_year' => 'required|integer|min:1000|max:' . date('Y'),
             'stock' => 'required|integer|min:0|max:1000',
-            'category_id' => 'nullable|exists:categories,id',
+            'category_id' => 'required|exists:categories,id',
         ], [
             'title.required' => 'Judul buku wajib diisi.',
             'title.min' => 'Judul buku minimal 3 karakter.',
