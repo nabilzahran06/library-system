@@ -229,6 +229,100 @@
         margin: 0;
     }
 
+    /* Modal konfirmasi hapus */
+    .delete-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .45);
+        backdrop-filter: blur(3px);
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        z-index: 99999;
+    }
+
+    .delete-modal.show {
+        display: flex;
+    }
+
+    .delete-modal-content {
+        width: 100%;
+        max-width: 400px;
+        background: #fff;
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, .15);
+        animation: modalAppear .25s ease;
+    }
+
+    .delete-icon {
+        width: 65px;
+        height: 65px;
+        background: #feecec;
+        color: #dc2626;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 30px;
+        margin: 0 auto 18px;
+    }
+
+    .delete-modal-content h3 {
+        margin: 0 0 10px;
+        font-size: 21px;
+        color: #222;
+    }
+
+    .delete-modal-content p {
+        margin: 0 0 25px;
+        color: #777;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .delete-modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .modal-btn {
+        padding: 10px 22px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .modal-cancel {
+        background: #f1f1f1;
+        color: #555;
+    }
+
+    .modal-confirm {
+        background: #dc2626;
+        color: #fff;
+    }
+
+    .modal-btn:hover {
+        opacity: .85;
+    }
+
+    @keyframes modalAppear {
+        from {
+            opacity: 0;
+            transform: translateY(10px) scale(.96);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
     @media (max-width: 600px) {
         .books-container {
             padding: 0 10px;
@@ -246,8 +340,6 @@
 </style>
 
 <div class="books-container">
-
-    {{-- Header --}}
     <div class="books-header">
         <div>
             <h2>Daftar Buku</h2>
@@ -259,7 +351,6 @@
         </a>
     </div>
 
-    {{-- Ringkasan --}}
     <div class="books-summary">
         <div class="summary-card">
             <span>Total Buku</span>
@@ -272,9 +363,7 @@
         </div>
     </div>
 
-    {{-- Tabel Buku --}}
     <div class="books-card">
-
         <div class="table-header">
             <h3>Koleksi Buku</h3>
             <p>Data buku yang tersimpan dalam database.</p>
@@ -303,38 +392,21 @@
                     <tbody>
                         @foreach ($books as $book)
                             <tr>
-                                <td class="book-number">
-                                    {{ $loop->iteration }}
-                                </td>
-
-                                <td class="book-id">
-                                    #{{ $book->id }}
-                                </td>
-
-                                <td class="book-title">
-                                    {{ $book->title }}
-                                </td>
-
-                                <td class="book-author">
-                                    {{ $book->author }}
-                                </td>
-
-                                <td>
-                                    {{ $book->published_year ?? '-' }}
-                                </td>
-
+                                <td class="book-number">{{ $loop->iteration }}</td>
+                                <td class="book-id">#{{ $book->id }}</td>
+                                <td class="book-title">{{ $book->title }}</td>
+                                <td class="book-author">{{ $book->author }}</td>
+                                <td>{{ $book->published_year ?? '-' }}</td>
                                 <td>
                                     <span class="book-stock">
                                         {{ $book->stock }} unit
                                     </span>
                                 </td>
-
                                 <td>
                                     <span class="book-category">
                                         {{ $book->category->name ?? '-' }}
                                     </span>
                                 </td>
-
                                 <td>
                                     <div class="book-actions">
                                         <a href="{{ route('books.show', $book->id) }}"
@@ -349,13 +421,11 @@
 
                                         <form action="{{ route('books.destroy', $book->id) }}"
                                               method="POST"
-                                              class="delete-form"
-                                              onsubmit="return confirm('Yakin ingin menghapus buku ini?')">
+                                              class="delete-form">
                                             @csrf
                                             @method('DELETE')
 
-                                            <button type="submit"
-                                                    class="action-btn action-delete">
+                                            <button type="submit" class="action-btn action-delete">
                                                 Hapus
                                             </button>
                                         </form>
@@ -371,7 +441,74 @@
         <div class="books-footer">
             Menampilkan {{ $books->count() }} data buku.
         </div>
-
     </div>
 </div>
+
+<div class="delete-modal" id="deleteModal" aria-hidden="true">
+    <div class="delete-modal-content" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+        <div class="delete-icon" aria-hidden="true">🗑</div>
+
+        <h3 id="deleteModalTitle">Hapus Buku?</h3>
+        <p>
+            Apakah Anda yakin ingin menghapus buku ini?
+            Data yang sudah dihapus tidak dapat dikembalikan.
+        </p>
+
+        <div class="delete-modal-actions">
+            <button type="button" class="modal-btn modal-cancel" id="cancelDelete">
+                Batal
+            </button>
+            <button type="button" class="modal-btn modal-confirm" id="confirmDelete">
+                Ya, Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteModal = document.getElementById('deleteModal');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
+        const deleteForms = document.querySelectorAll('.delete-form');
+
+        let selectedDeleteForm = null;
+
+        deleteForms.forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                selectedDeleteForm = form;
+                deleteModal.classList.add('show');
+                deleteModal.setAttribute('aria-hidden', 'false');
+                cancelDelete.focus();
+            });
+        });
+
+        function closeDeleteModal() {
+            deleteModal.classList.remove('show');
+            deleteModal.setAttribute('aria-hidden', 'true');
+            selectedDeleteForm = null;
+        }
+
+        cancelDelete.addEventListener('click', closeDeleteModal);
+
+        confirmDelete.addEventListener('click', function () {
+            if (selectedDeleteForm) {
+                selectedDeleteForm.submit();
+            }
+        });
+
+        deleteModal.addEventListener('click', function (event) {
+            if (event.target === deleteModal) {
+                closeDeleteModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && deleteModal.classList.contains('show')) {
+                closeDeleteModal();
+            }
+        });
+    });
+</script>
 @endsection
